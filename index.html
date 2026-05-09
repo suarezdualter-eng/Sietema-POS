@@ -21,19 +21,98 @@
   </style>
 </head>
 <body>
-
   <h3>Sistema Web de Facturación (Mini POS)</h3>
-
   <p>Carrito actual: <strong id="arrayActual">[]</strong></p>
-
   <button onclick="agregarProducto()">Agregar Producto</button>
   <button onclick="eliminarUltimo()">Eliminar Último</button>
   <button onclick="ordenarAsc()">Ordenar por Precio</button>
   <button onclick="buscarProducto()">Buscar Producto</button>
   <button onclick="calcularTotal()">Calcular Total</button>
-
   <div id="output">Aquí voy a mostrar los resultados...</div>
 
-  <script src="script.js"></script>
+  <script>
+    // Catálogo fijo de productos
+    let productos = [
+      { id: 1, nombre: "Camiseta", precio: 30000 },
+      { id: 2, nombre: "Pantalón", precio: 60000 },
+      { id: 3, nombre: "Zapatos", precio: 120000 },
+      { id: 4, nombre: "Medias", precio: 6000 },
+      { id: 5, nombre: "Gafas", precio: 10000 },
+      { id: 6, nombre: "Gorra", precio: 18000 },
+      { id: 7, nombre: "Sueter", precio: 25000 },
+      { id: 8, nombre: "Boxer", precio: 16000 },
+      { id: 9, nombre: "Reloj", precio: 60000 },
+      { id: 10, nombre: "Corbata", precio: 15000 },
+    ];
+
+    // Carrito de compras
+    let carrito = [];
+
+    function actualizarVista() {
+      let tabla = "<table border='1' cellpadding='5'><tr><th>Producto</th><th>Precio</th><th>Cantidad</th><th>Subtotal</th></tr>";
+      carrito.forEach(p => {
+        let subtotal = p.precio * p.cantidad;
+        tabla += `<tr><td>${p.nombre}</td><td>$${p.precio}</td><td>${p.cantidad}</td><td>$${subtotal}</td></tr>`;
+      });
+      tabla += "</table>";
+      document.getElementById("arrayActual").textContent = JSON.stringify(carrito);
+      document.getElementById("output").innerHTML = tabla;
+    }
+
+    function mostrar(mensaje) {
+      document.getElementById("output").innerHTML = mensaje;
+    }
+
+    function agregarProducto() {
+      let id = parseInt(prompt("Ingrese el ID del producto (1=Camiseta, 2=Pantalón, 3=Zapatos):"));
+      let cantidad = parseInt(prompt("Cantidad:"));
+      let producto = productos.find(p => p.id === id);
+      if (producto && !isNaN(cantidad)) {
+        carrito.push({ ...producto, cantidad });
+        actualizarVista();
+      } else {
+        mostrar("Datos inválidos, intenta de nuevo.");
+      }
+    }
+
+    function eliminarUltimo() {
+      if (carrito.length === 0) {
+        mostrar("El carrito está vacío");
+        return;
+      }
+      let eliminado = carrito.pop();
+      actualizarVista();
+      mostrar("Producto eliminado: " + eliminado.nombre);
+    }
+
+    function ordenarAsc() {
+      carrito.sort((a, b) => a.precio - b.precio);
+      actualizarVista();
+      mostrar("Carrito ordenado por precio ascendente");
+    }
+
+    function buscarProducto() {
+      let nombre = prompt("¿Qué producto desea buscar?");
+      if (!nombre) return;
+      let indice = carrito.findIndex(p => p.nombre.toLowerCase() === nombre.toLowerCase());
+      if (indice === -1) {
+        mostrar("El producto " + nombre + " no existe en el carrito");
+      } else {
+        mostrar("El producto " + nombre + " está en la posición " + indice);
+      }
+    }
+
+    function calcularTotal() {
+      let subtotalGeneral = carrito.reduce((suma, p) => suma + (p.precio * p.cantidad), 0);
+      let iva = subtotalGeneral * 0.19;
+      let totalFinal = subtotalGeneral + iva;
+      let resumen = `
+        <p><strong>Subtotal:</strong> $${subtotalGeneral}</p>
+        <p><strong>IVA (19%):</strong> $${iva}</p>
+        <p><strong>Total a pagar:</strong> $${totalFinal}</p>
+      `;
+      document.getElementById("output").innerHTML += resumen;
+    }
+  </script>
 </body>
 </html>
